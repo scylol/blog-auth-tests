@@ -31,6 +31,14 @@ const fakeUser = {
   firstName: faker.name.firstName(),
   lastName: faker.name.lastName()
 };
+function generateUser() {
+  return {
+    username: faker.internet.userName(),
+    password: 'whatever',
+    firstName: faker.name.firstName(),
+    lastName: faker.name.lastName()
+  };
+}
 console.log(fakeUser);
 
 function seedData() {
@@ -117,7 +125,22 @@ describe('blog posts testing suite', function () {
   });
 
   describe('POST endpoints', function () {
-    it('should add a new blog post', function () {
+    it.only('should add a new user', function () {
+      const newUser = generateUser();
+      return chai.request(app)
+        .post('/users')
+				.auth(fakeUser.username, fakeUser.unhashed)
+        .send(newUser)
+        .then(function (res) {
+          res.should.have.status(201);
+          res.body.should.be.a('object');
+          res.should.be.json;
+          res.body.should.include.keys('username', 'firstName', 'lastName');
+          res.body.should.not.be.null;
+        });
+    });//need to double check in database
+
+    it('should add a new post', function () {
       const newPost = generateBlogPosts();
       return chai.request(app)
         .post('/posts')
@@ -131,7 +154,7 @@ describe('blog posts testing suite', function () {
           res.body.should.not.be.null;
           res.body.id.should.equal(res.body.id);
         });
-    });//need to double check in database
+    });
   });
 
   describe('PUT endpoints', function () {
